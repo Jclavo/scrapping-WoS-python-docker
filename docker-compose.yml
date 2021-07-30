@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  python-fuzzing-book:
+    image: python-3.8
+    container_name: my-python-3.8
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 5678:5678
+    volumes:
+      - ./code:/app/code
+    command: python /app/code/main.py
+    # command: tail -f /dev/null # keep open container 
