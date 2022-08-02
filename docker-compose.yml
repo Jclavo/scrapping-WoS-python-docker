@@ -1,9 +1,9 @@
 version: '3.4'
 
 services:
-  my-python-3.8:
+  scrapping-WoS:
     image: python-3.8
-    container_name: my-python-container-3.8
+    container_name: scrapping-WoS
     build:
       context: .
       dockerfile: ./Dockerfile
