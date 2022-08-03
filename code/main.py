@@ -77,7 +77,9 @@ def filterXlsFile(filePath, log = False):
                     df["Abstract"].str.lower().str.contains(main_key_words_good)
                 ) &
                 (
-                    df["Abstract"].str.lower().str.contains("static")
+                    df["Abstract"].str.lower().str.contains("static") 
+                    &
+                    df["Abstract"].str.lower().str.contains("java")
                 )
             )
         ]
