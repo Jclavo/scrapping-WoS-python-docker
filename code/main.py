@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+import time
 
 def filterXlsFile(filePath, log = False):
 
@@ -105,8 +106,10 @@ def main():
     search_by_TI_DF = filterXlsFile("/app/code/data/search_by_TI.xls")
     search_by_AB_DF = filterXlsFile("/app/code/data/search_by_AB.xls")
 
-    r = pd.concat([search_by_TI_DF,search_by_AB_DF]).drop_duplicates().reset_index(drop=True)
-    print(f'> {len(r.index)} records')
+    result_DF = pd.concat([search_by_TI_DF,search_by_AB_DF]).drop_duplicates().reset_index(drop=True)
+    print(f'> {len(result_DF.index)} records')
+
+    result_DF.to_excel(f'/app/code/data/result_{round(time.time() * 1000)}.xls')
 
 if __name__ == "__main__":
     main()
