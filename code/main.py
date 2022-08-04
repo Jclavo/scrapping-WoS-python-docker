@@ -67,19 +67,16 @@ def filterXlsFile(filePath, log = False):
             (
                 (
                     df["Article Title"].str.lower().str.contains(main_key_words_good)
-                ) &
-                (
-                    df["Article Title"].str.lower().str.contains("static")
                 )
-            ) | 
+            ) 
+                | 
             (
                 (
                     df["Abstract"].str.lower().str.contains(main_key_words_good)
-                ) &
+                ) 
+                    &
                 (
                     df["Abstract"].str.lower().str.contains("static") 
-                    &
-                    df["Abstract"].str.lower().str.contains("java")
                 )
             )
         ]
@@ -93,6 +90,11 @@ def filterXlsFile(filePath, log = False):
                     df["Source Title"].str.lower().str.contains(conferences_key_words) |
                     df["Source Title"].str.lower().str.contains(journals_main_key_words_good)
                 )
+                |
+                (
+                    df["Conference Title"].str.lower().str.contains(conferences_key_words) |
+                    df["Conference Title"].str.lower().str.contains(journals_main_key_words_good)
+                )               
             )
         ]
     
