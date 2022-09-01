@@ -7,6 +7,8 @@ def filterXlsFile(filePath, log = False):
 
     df = pd.read_excel(filePath)
 
+    #print(f'{filePath} > {len(df.index)} initial records')
+
     main_key_words_good = [
     "taint analysis",
     "information flow",
@@ -108,9 +110,13 @@ def filterXlsFile(filePath, log = False):
 
 def main():
     search_by_TI_DF = filterXlsFile("/app/code/data/search_by_TI.xls")
-    search_by_AB_DF = filterXlsFile("/app/code/data/search_by_AB.xls")
+    search_by_AB_DF_I = filterXlsFile("/app/code/data/search_by_AB_I.xls")
+    search_by_AB_DF_II = filterXlsFile("/app/code/data/search_by_AB_II.xls")
 
-    result_DF = pd.concat([search_by_TI_DF,search_by_AB_DF]).drop_duplicates().reset_index(drop=True)
+    search_by_AB_DF = pd.concat([search_by_AB_DF_I,search_by_AB_DF_II])
+
+    #result_DF = pd.concat([search_by_TI_DF,search_by_AB_DF]).drop_duplicates().reset_index(drop=True)
+    result_DF = pd.concat([search_by_TI_DF,search_by_AB_DF])
     print(f'> {len(result_DF.index)} records')
 
     result_DF.to_excel(f'/app/code/data/result_{round(time.time() * 1000)}.xls')
