@@ -107,19 +107,41 @@ def filterXlsFile(filePath, log = False):
     print(f'{filePath} > {len(result.index)} records')
     return result
 
+def filterFinalResult(result):
+
+    result_DF = pd.DataFrame(result).drop_duplicates(subset=['UT (Unique WOS ID)'])
+
+    columns = [
+        'Article Title',
+        'Abstract',
+        'Publication Type',
+        'Source Title',
+        'Document Type',
+        'Conference Title',
+        'Conference Location',
+        'Times Cited, All Databases',
+        'Publication Year',
+        'UT (Unique WOS ID)',
+    ]
+
+    return result_DF[columns]
+
 
 def main():
+
     search_by_TI_DF = filterXlsFile("/app/code/data/search_by_TI.xls")
     search_by_AB_DF_I = filterXlsFile("/app/code/data/search_by_AB_I.xls")
     search_by_AB_DF_II = filterXlsFile("/app/code/data/search_by_AB_II.xls")
 
-    search_by_AB_DF = pd.concat([search_by_AB_DF_I,search_by_AB_DF_II])
+    search_by_AB_DF = pd.concat([search_by_AB_DF_I, search_by_AB_DF_II])
 
-    #result_DF = pd.concat([search_by_TI_DF,search_by_AB_DF]).drop_duplicates().reset_index(drop=True)
-    result_DF = pd.concat([search_by_TI_DF,search_by_AB_DF])
+    result_DF = pd.concat([search_by_TI_DF, search_by_AB_DF])
+
+    result_DF = filterFinalResult(result_DF)
+
     print(f'> {len(result_DF.index)} records')
 
-    result_DF.to_excel(f'/app/code/data/result_{round(time.time() * 1000)}.xls')
+    result_DF.to_excel(f'/app/code/data/output/result_{round(time.time() * 1000)}.xls')
 
 if __name__ == "__main__":
     main()
