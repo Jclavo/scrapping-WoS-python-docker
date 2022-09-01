@@ -109,7 +109,7 @@ def filterXlsFile(filePath, log = False):
 
 def filterFinalResult(result):
 
-    result_DF = pd.DataFrame(result).drop_duplicates(subset=['UT (Unique WOS ID)'])
+    result_DF = pd.DataFrame(result).drop_duplicates(subset=['UT (Unique WOS ID)']).applymap(lambda s:s.lower() if type(s) == str else s)
 
     columns = [
         'Article Title',
