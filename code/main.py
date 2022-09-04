@@ -11,15 +11,25 @@ def filterXlsFile(filePath, log = False):
 
     main_key_words_good = [
     "taint analysis",
+    "tainted analysis",
     "information flow",
-    "information-flow"
+    "information-flow",
+    "data flow",
+    "data-flow"
     ]
     main_key_words_good = '|'.join(main_key_words_good)
 
-    sub_main_key_words_good = [
-        "static"
+    sub_main_key_language = [
+        "java",
+        "android"
     ]
-    sub_main_key_words_good = '|'.join(sub_main_key_words_good)
+    sub_main_key_language = '|'.join(sub_main_key_language)
+
+    sub_main_key_taint = [
+        "taint",
+        "tainted"
+    ]
+    sub_main_key_taint = '|'.join(sub_main_key_taint)
 
     conferences_key_words = [
         "conference on programming language design and implementation", "PLDI",
@@ -78,7 +88,17 @@ def filterXlsFile(filePath, log = False):
                 ) 
                     &
                 (
-                    df["Abstract"].str.lower().str.contains("static") 
+                    (
+                        df["Abstract"].str.lower().str.contains("static")
+                    )
+                        &
+                    (
+                        df["Abstract"].str.lower().str.contains(sub_main_key_taint)
+                    )
+                        &
+                    (
+                        df["Abstract"].str.lower().str.contains(sub_main_key_language)
+                    )
                 )
             )
         ]
@@ -130,10 +150,11 @@ def filterFinalResult(result):
 def main():
 
     search_by_TI_DF = filterXlsFile("/app/code/data/search_by_TI.xls")
-    search_by_AB_DF_I = filterXlsFile("/app/code/data/search_by_AB_I.xls")
-    search_by_AB_DF_II = filterXlsFile("/app/code/data/search_by_AB_II.xls")
-
-    search_by_AB_DF = pd.concat([search_by_AB_DF_I, search_by_AB_DF_II])
+    
+    # search_by_AB_DF_I = filterXlsFile("/app/code/data/search_by_AB_I.xls")
+    # search_by_AB_DF_II = filterXlsFile("/app/code/data/search_by_AB_II.xls")
+    # search_by_AB_DF = pd.concat([search_by_AB_DF_I, search_by_AB_DF_II])
+    search_by_AB_DF = filterXlsFile("/app/code/data/search_by_AB.xls")
 
     result_DF = pd.concat([search_by_TI_DF, search_by_AB_DF])
 
