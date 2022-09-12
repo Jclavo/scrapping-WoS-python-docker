@@ -3,11 +3,9 @@ import pandas as pd
 import numpy as np
 import time
 
-def filterXlsFile(filePath, log = False):
+def filterXlsFile(main_df, log = False):
 
-    df = pd.read_excel(filePath)
-
-    #print(f'{filePath} > {len(df.index)} initial records')
+    #print(f'{filePath} > {len(main_df.index)} initial records')
 
     main_key_words_good = [
     "taint analysis",
@@ -75,59 +73,82 @@ def filterXlsFile(filePath, log = False):
     ]
     journals_main_key_words_good = '|'.join(journals_main_key_words_good)
 
-    main_result = df [
-            (
-                (
-                    df["Article Title"].str.lower().str.contains(main_key_words_good)
-                )
-            ) 
-                | 
-            (
-                (
-                    df["Abstract"].str.lower().str.contains(main_key_words_good)
-                ) 
-                    &
-                (
-                    (
-                        df["Abstract"].str.lower().str.contains("static")
-                    )
-                        &
-                    (
-                        df["Abstract"].str.lower().str.contains(sub_main_key_taint)
-                    )
-                        &
-                    (
-                        df["Abstract"].str.lower().str.contains(sub_main_key_language)
-                    )
-                )
-            )
-        ]
-    
-    if log :
-        print('main_result', len(main_result.index))
+    # main_result = df [
+    #         (
+    #             (
+    #                 df["Article Title"].str.lower().str.contains(main_key_words_good)
+    #             )
+    #         ) 
+    #             | 
+    #         (
+    #             (
+    #                 df["Abstract"].str.lower().str.contains(main_key_words_good)
+    #             ) 
+    #                 &
+    #             (
+    #                 (
+    #                     df["Abstract"].str.lower().str.contains("static")
+    #                 )
+    #                     &
+    #                 (
+    #                     df["Abstract"].str.lower().str.contains(sub_main_key_taint)
+    #                 )
+    #                     &
+    #                 (
+    #                     df["Abstract"].str.lower().str.contains(sub_main_key_language)
+    #                 )
+    #             )
+    #         )
+    #     ]
 
-    source_result = df [
+    main_df["Abstract"].fillna("", inplace = True)
+    # main_result = df [
+    #     (
+    #         df["Abstract"].str.lower().str.contains(sub_main_key_language)
+    #     )
+    # ]
+    
+    # if log :
+    #     print('main_result', len(main_result.index))
+
+    source_result = main_df [
+        (
             (
-                (
-                    df["Source Title"].str.lower().str.contains(conferences_key_words) |
-                    df["Source Title"].str.lower().str.contains(journals_main_key_words_good)
-                )
-                |
-                (
-                    df["Conference Title"].str.lower().str.contains(conferences_key_words) |
-                    df["Conference Title"].str.lower().str.contains(journals_main_key_words_good)
-                )               
+                main_df["Source Title"].str.lower().str.contains(conferences_key_words) |
+                main_df["Source Title"].str.lower().str.contains(journals_main_key_words_good)
             )
-        ]
+                |
+            (
+                main_df["Conference Title"].str.lower().str.contains(conferences_key_words) |
+                main_df["Conference Title"].str.lower().str.contains(journals_main_key_words_good)
+            )               
+        )
+    ]
+
+    abstract_source_result = source_result [
+        (
+            source_result["Abstract"].str.lower().str.contains(sub_main_key_language)
+        )
+    ]
     
     if log :
+        print('abstract_source_result', len(abstract_source_result.index))
         print('source_result', len(source_result.index))
 
-    result = pd.merge(main_result, source_result)
-    print(f'{filePath} > {len(result.index)} records')
-    return result
+    #result = pd.merge(main_result, source_result)
+    result = abstract_source_result
+    result_remainder = pd.concat([abstract_source_result,source_result]).drop_duplicates(keep=False)
 
-def filterFinalResult(result):
+    filePath = ""
+    #print(f'{filePath} > {len(result.index)} records')
+    #print(f'{filePath} > {len(result_remainder.index)} remainder records')
+    #return result
+    filterFinalResult(result, 'result')
+    filterFinalResult(result_remainder, 'result_remainder')
+
+
+
+def filterFinalResult(result, fileName):
 
     result_DF = pd.DataFrame(result).drop_duplicates(subset=['UT (Unique WOS ID)']).applymap(lambda s:s.lower() if type(s) == str else s)
 
@@ -144,25 +165,27 @@ def filterFinalResult(result):
         'UT (Unique WOS ID)',
     ]
 
-    return result_DF[columns]
+    result_DF = result_DF[columns]
+    result_DF.to_excel(f'/app/code/data/output/{fileName}_{round(time.time() * 1000)}.xls')
 
 
 def main():
 
-    search_by_TI_DF = filterXlsFile("/app/code/data/search_by_TI.xls")
+    search_by_TI_DF = pd.read_excel("/app/code/data/search_by_TI.xls")
     
-    # search_by_AB_DF_I = filterXlsFile("/app/code/data/search_by_AB_I.xls")
-    # search_by_AB_DF_II = filterXlsFile("/app/code/data/search_by_AB_II.xls")
-    # search_by_AB_DF = pd.concat([search_by_AB_DF_I, search_by_AB_DF_II])
-    search_by_AB_DF = filterXlsFile("/app/code/data/search_by_AB.xls")
+    search_by_AB_DF_I = pd.read_excel("/app/code/data/search_by_AB_I.xls")
+    search_by_AB_DF_II = pd.read_excel("/app/code/data/search_by_AB_II.xls")
+    search_by_AB_DF = pd.concat([search_by_AB_DF_I, search_by_AB_DF_II], ignore_index=True)
 
-    result_DF = pd.concat([search_by_TI_DF, search_by_AB_DF])
+    result_DF = pd.concat([search_by_TI_DF, search_by_AB_DF], ignore_index=True)
 
-    result_DF = filterFinalResult(result_DF)
+    result_DF = result_DF.drop_duplicates(subset=['UT (Unique WOS ID)']).applymap(lambda s:s.lower() if type(s) == str else s)
 
-    print(f'> {len(result_DF.index)} records')
+    result_DF = filterXlsFile(result_DF)
 
-    result_DF.to_excel(f'/app/code/data/output/result_{round(time.time() * 1000)}.xls')
+    #print(f'> {len(result_DF.index)} records')
+
+    #result_DF.to_excel(f'/app/code/data/output/result_{round(time.time() * 1000)}.xls')
 
 if __name__ == "__main__":
     main()
